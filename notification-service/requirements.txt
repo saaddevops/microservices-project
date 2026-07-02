@@ -1,7 +1,4 @@
-flask
-flask-cors
-requests
-pyjwt
+pika
 python-dotenv
 pytest
 flake8
