@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual Environments
+venv/
+.env
+
+# VS Code
+.vscode/
+
+# Docker
+*.log
+
+# Node
+node_modules/
+dist/
+
+# React
+frontend/node_modules/
+frontend/dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment files
+**/.env
+
+# Python cache
+.pytest_cache/
+
+# Local database
+*.sqlite3

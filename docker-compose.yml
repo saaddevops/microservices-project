@@ -1,0 +1,102 @@
+services:
+
+  postgres:
+    image: postgres:17
+    container_name: postgres-db
+
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${USER_DB}
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+
+    container_name: redis
+
+    ports:
+      - "6379:6379"
+
+  user-service:
+    build: ./user-service
+    container_name: user-service
+
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      USER_DB: ${USER_DB}
+      SECRET_KEY: ${SECRET_KEY}
+
+    ports:
+      - "5000:5000"
+
+    depends_on:
+      - postgres
+
+  order-service:
+    build: ./order-service
+    container_name: order-service
+
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      ORDER_DB: ${ORDER_DB}
+      SECRET_KEY: ${SECRET_KEY}
+      REDIS_HOST: ${REDIS_HOST}
+
+    ports:
+      - "5001:5001"
+
+    depends_on:
+      - postgres
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+
+    ports:
+      - "8000:8000"
+
+    depends_on:
+      - user-service
+      - order-service
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+
+    ports:
+      - "5173:5173"
+
+    depends_on:
+      - user-service
+      - order-service
+
+  rabbitmq:
+    image: rabbitmq:3-management
+
+    container_name: rabbitmq
+
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  notification-service:
+    build: ./notification-service
+
+    container_name: notification-service
+
+    env_file:
+    - ./notification-service/.env
+
+    depends_on:
+      - rabbitmq
+
+volumes:
+  postgres_data:
