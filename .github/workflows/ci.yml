@@ -11,23 +11,74 @@ on:
 
 jobs:
 
-  build:
+  python-checks:
 
     runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        service:
+          - user-service
+          - order-service
+          - api-gateway
+          - notification-service
 
     steps:
 
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v5
-
         with:
           python-version: "3.12"
 
-      - name: Verify Python
-        run: python --version
+      - name: Install Dependencies
+        run: |
+          cd ${{ matrix.service }}
+          pip install -r requirements.txt
+
+      - name: Python Syntax Check
+        run: |
+          cd ${{ matrix.service }}
+          python -m py_compile *.py
+
+      - name: Run Flake8
+        run: |
+          cd ${{ matrix.service }}
+          flake8 . || true
+
+  frontend-build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: |
+          cd frontend
+          npm install
+
+      - run: |
+          cd frontend
+          npm run build
+
+  docker-build:
+
+    needs:
+      - python-checks
+      - frontend-build
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - uses: actions/checkout@v4
 
       - name: Build User Service
         run: docker build ./user-service
@@ -43,6 +94,3 @@ jobs:
 
       - name: Build Frontend
         run: docker build ./frontend
-
-      - name: CI Completed
-        run: echo "All Docker images built successfully!"
