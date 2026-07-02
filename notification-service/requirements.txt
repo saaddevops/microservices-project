@@ -1,2 +1,7 @@
-pika
+flask
+flask-cors
+requests
+pyjwt
 python-dotenv
+pytest
+flake8
