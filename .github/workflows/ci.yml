@@ -1,1 +1,48 @@
+name: Microservices CI
 
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+
+        with:
+          python-version: "3.12"
+
+      - name: Verify Python
+        run: python --version
+
+      - name: Build User Service
+        run: docker build ./user-service
+
+      - name: Build Order Service
+        run: docker build ./order-service
+
+      - name: Build API Gateway
+        run: docker build ./api-gateway
+
+      - name: Build Notification Service
+        run: docker build ./notification-service
+
+      - name: Build Frontend
+        run: docker build ./frontend
+
+      - name: CI Completed
+        run: echo "All Docker images built successfully!"
